@@ -1,21 +1,5 @@
 1;
 
-function Z = blondelZ(A, B, Z0, maxIter, tol)
-% Blondel iteration with a given starting matrix Z0 (size(B,1) x size(A,1)).
-% Even number of steps, normalized by the Frobenius norm each step.
-    Z = Z0 / norm(Z0, 'fro');
-    for it = 1:maxIter
-        Zold = Z;
-        for step = 1:2
-            Z = B*Z*A' + B'*Z*A;
-            Z = Z / norm(Z, 'fro');
-        end
-        if norm(Z - Zold, 'fro') < tol
-            break;
-        end
-    end
-end
-
 function s = graphScore(A, B, la, lb, useLabels, maxIter, tol)
 % One number describing how well G_A and G_B match (not yet normalized).
     if useLabels
@@ -26,7 +10,7 @@ function s = graphScore(A, B, la, lb, useLabels, maxIter, tol)
     if norm(Z0, 'fro') == 0
         s = 0; return;                          % no common atom types at all
     end
-    Z  = blondelZ(A, B, Z0, maxIter, tol);
+    Z  = blondel_slicnost(A, B, Z0, maxIter, tol);
     Zs = Z * sqrt(numel(Z));                    % remove size effect
     s  = (mean(max(Zs, [], 1)) + mean(max(Zs, [], 2))) / 2;   % symmetric best match
 end
