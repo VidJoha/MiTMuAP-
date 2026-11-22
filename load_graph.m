@@ -1,3 +1,4 @@
+%Matrica susjedstava europskih gradova koji imaju direktan let od jednog do drugog
 graf_Direktnih_letova = load('matrica_Gradova.txt');
 
 
