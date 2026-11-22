@@ -1,85 +1,19 @@
-README for dataset MUTAG
+3 primjera za upotrebu matrice sličnosti
 
+1. primjer sličnost europskih gradova
+Program uzima matricu susjedstava u kojoj su gradovi susjedi ako postoji direktan let između njih
+Program ispisuje grad koji je najsličniji Zagrebu
 
-=== Usage ===
+2. wiki_vote_sličnost
+Program uzima datoteku u kojoj pišu tko je za koga glasao.
+Uzima se 500 najaktivnijih glasača.
+Uspoređuje ih se kosinus metodom koja uspoređuje glasače samo jednom iteracijom matrice sličnosti. 
+Glasači su slični ako su glasali za iste ljude i ako su isti ljudi glasali za njih.
+Druga metoda je puna iteracija matrice sličnosti.
+Glasači su slični ako su glasali za iste ljude i ako su isti ljudi glasali za njih i ako i ti ljudi glasali za iste ljude i ako su i ti ljudi glasali za iste ljude i tako dalje.
+Ispisuje se 10 najsličnijih glasača za jednu i drugu metodu i prikazuje ih se na heat dijagramu
 
-This folder contains the following comma separated text files 
-(replace DS by the name of the dataset):
-
-n = total number of nodes
-m = total number of edges
-N = number of graphs
-
-(1) 	DS_A.txt (m lines) 
-	sparse (block diagonal) adjacency matrix for all graphs,
-	each line corresponds to (row, col) resp. (node_id, node_id)
-
-(2) 	DS_graph_indicator.txt (n lines)
-	column vector of graph identifiers for all nodes of all graphs,
-	the value in the i-th line is the graph_id of the node with node_id i
-
-(3) 	DS_graph_labels.txt (N lines) 
-	class labels for all graphs in the dataset,
-	the value in the i-th line is the class label of the graph with graph_id i
-
-(4) 	DS_node_labels.txt (n lines)
-	column vector of node labels,
-	the value in the i-th line corresponds to the node with node_id i
-
-There are OPTIONAL files if the respective information is available:
-
-(5) 	DS_edge_labels.txt (m lines; same size as DS_A_sparse.txt)
-	labels for the edges in DD_A_sparse.txt 
-
-(6) 	DS_edge_attributes.txt (m lines; same size as DS_A.txt)
-	attributes for the edges in DS_A.txt 
-
-(7) 	DS_node_attributes.txt (n lines) 
-	matrix of node attributes,
-	the comma seperated values in the i-th line is the attribute vector of the node with node_id i
-
-(8) 	DS_graph_attributes.txt (N lines) 
-	regression values for all graphs in the dataset,
-	the value in the i-th line is the attribute of the graph with graph_id i
-
-
-=== Description of the dataset === 
-
-The MUTAG dataset consists of 188 chemical compounds divided into two 
-classes according to their mutagenic effect on a bacterium. 
-
-The chemical data was obtained form http://cdb.ics.uci.edu and converted 
-to graphs, where vertices represent atoms and edges represent chemical 
-bonds. Explicit hydrogen atoms have been removed and vertices are labeled
-by atom type and edges by bond type (single, double, triple or aromatic).
-Chemical data was processed using the Chemistry Development Kit (v1.4).
-
-Node labels:
-
-  0  C
-  1  N
-  2  O
-  3  F
-  4  I
-  5  Cl
-  6  Br
-
-Edge labels:
-
-  0  aromatic
-  1  single
-  2  double
-  3  triple
-
-
-=== Previous Use of the Dataset ===
-
-Kriege, N., Mutzel, P.: Subgraph matching kernels for attributed graphs. In: Proceedings
-of the 29th International Conference on Machine Learning (ICML-2012) (2012).
-
-
-=== References ===
-
-Debnath, A.K., Lopez de Compadre, R.L., Debnath, G., Shusterman, A.J., and Hansch, C.
-Structure-activity relationship of mutagenic aromatic and heteroaromatic nitro compounds.
-Correlation with molecular orbital energies and hydrophobicity. J. Med. Chem. 34(2):786-797 (1991).
+3. mutag_slicnost
+Program uzima datoteku sa molekulama,njihovim vezama i tipovima atoma.
+Uspoređuje 188 molekula iterativnom metodom te ispisuje 10 najsličnijih molekula i jesu li mutagene ili ne.
+Ovime možemo pokazati da struktura molekule najvjerojatnije ne ovisi o strukturi molekule nego o nečem drugom.
