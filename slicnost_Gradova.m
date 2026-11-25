@@ -1,4 +1,13 @@
-%Matrica susjedstava europskih gradova koji imaju direktan let od jednog do drugog
+1;
+function [S, common, d] = cosineSimilarity(B)
+    N      = size(B, 1);
+    d      = full(sum(B, 2));
+    Bn     = spdiags(1 ./ sqrt(d), 0, N, N) * B;
+    S      = full(Bn * Bn');
+    common = full(B * B');
+end
+
+
 graf_Direktnih_letova = load('matrica_Gradova.txt');
 
 
@@ -11,7 +20,7 @@ cities = {
   'Bratislava', ...
   'Bruxelles', ...
   'Budapest', ...
-  'Bukurest', ...
+  'Bucharest', ...
   'Copenhagen', ...
   'Dublin', ...
   'Helsinki', ...
@@ -42,10 +51,16 @@ tol       = 1e-9;
 n = numel(cities);
 Z0 = ones(size(graf_Direktnih_letova,1),size(graf_Direktnih_letova,1));
 S = blondel_slicnost(graf_Direktnih_letova,graf_Direktnih_letova,Z0,maxIter,tol);
-S(n,:);
-[val,ind]=max(S(n,:));
+s1 = S(n,:);
+s1(n)=-inf;
+[val,ind]=max(s1);
 
-fprintf('Najslicniji grad Zagrebu je %s\n',cities{ind})
-
-
+fprintf('Najslicniji grad Zagrebu (kosinus metoda) je %s ',cities{ind})
+fprintf('\n')
+S2 = cosineSimilarity(graf_Direktnih_letova);
+s2=S2(n,:);
+s2(n)=-inf;
+[val2,ind2]=max(s2);
+fprintf('Najslicniji grad Zagrebu (iterativna metoda) je %s ',cities{ind2})
+fprintf('\n')
 dlmwrite('matrica_Slicnosti_Gradova.txt', S, ' ');
