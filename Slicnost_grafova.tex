@@ -42,7 +42,7 @@
 \numberwithin{figure}{section}
 \graphicspath{{images/}}
 \title{Primjene mjere sličnosti grafova}
-\author{Vid Joha}
+\author{Dea Gubijan, Ana Ivković, Vid Joha}
 \date{Studeni 2026.}
 \begin{document}
 \maketitle
@@ -309,9 +309,119 @@ Izravan algoritamski zapis definicije dovodi do aproksimacijskog algoritma za ra
     \item Izlaz $\mathbf{S}$ posljednja je vrijednost od $Z_k$.
 \end{enumerate}
 \section{Primjene}
+\subsection{Rječnik sinonima}
+
+Ovaj primjer je izvorna primjena metode iz rada~\cite{blondel2004similarity}: pronalazak sinonima u rječniku. Skup podataka je graf engleskog rječnika sa $112\,169$ vrhova i $1\,398\,424$ brida. Vrhovi su riječi, a usmjereni brid $i\to j$ postoji ako se riječ $j$ pojavljuje u definiciji riječi $i$. Podaci su spremljeni u dvije datoteke. Datoteka \texttt{dico.gph} je tekstualna datoteka čiji prvi redak sadrži broj vrhova, a svaki sljedeći redak je jedan brid zapisan kao par indeksa vrhova. Datoteka \texttt{index.txt} sadrži popis riječi, pri čemu je riječ u retku $i$ ona koja odgovara vrhu $i$. 
+
+Za zadanu riječ $r$ ne gledamo cijeli rječnik, nego samo njezin \emph{podgraf okoline} $N_r$. Njegovi vrhovi su riječ $r$, riječi iz njezine definicije (vrhovi na koje $r$ pokazuje) i riječi u čijim se definicijama pojavljuje $r$ (vrhovi koji pokazuju na $r$), a bridovi su svi bridovi rječnika između tih vrhova. Podgraf $N_r$ zatim uspoređujemo sa strukturnim grafom $1\longrightarrow 2\longrightarrow 3$ iz teorije. Vrh $2$ tog grafa ima i prethodnika i sljedbenika, kao i sama riječ $r$, pa je ocjena sličnosti s njim zapravo mjera \emph{centralnosti} u $N_r$. Riječi s najvećom ocjenom su kandidati za sinonime. Prema~\cite{blondel2004similarity} taj se stupac matrice sličnosti može dobiti i izravno kao svojstveni vektor matrice $L^TL+LL^T$ za najveću svojstvenu vrijednost, gdje je $L$ matrica susjedstava grafa $N_r$. 
+
+
+\begin{lstlisting}[style=octave, caption={Učitavanje rječnika}, label={lst:rj_ucitavanje}]
+format long g;
+%prije ovog treba u command window napisati ovo, onda se brzo učitava
+%G=load(dico.gph);
+%save('dico.mat', 'G'   );
+load('dico.mat');
+
+fid_idx=fopen('index.txt', 'r'); %otvara index.txt, 'r' znači samo za čitanje
+sve_rijeci=textscan(fid_idx, '%s'){1}; %niz riječi iz rječnika
+fclose(fid_idx);
+\end{lstlisting}
+Čitanje tekstualne datoteke \texttt{dico.gph} sa $1.4$ milijuna redaka je sporo, pa se matrica bridova \texttt{G} jednom učita i spremi u binarnu datoteku \texttt{dico.mat}, iz koje se poslije učitava brzo. Matrica \texttt{G} ima dva stupca: u prvom je indeks riječi čija je definicija, a u drugom indeks riječi koja se u njoj pojavljuje. Ćelija \texttt{sve\_rijeci} sadrži sve riječi rječnika po redoslijedu iz \texttt{index.txt}, pa je \texttt{sve\_rijeci\{i\}} riječ koja odgovara vrhu $i$.
+
+Sljedeći dio uklanja vrlo česte riječi.
+
+\begin{lstlisting}[style=octave, caption={Uklanjanje stop riječi}, label={lst:rj_stop}]
+stop_rijeci={'a', 'an', 'the', 'and', 'or', 'but', 'if', 'then', 'else', 'when', 'at', 'by', 'for', 'with', 'about', 'against', 'between', 'into', 'through', 'during', 'before', 'after', 'above', 'below', 'to', 'from', 'in', 'out', 'on', 'off', 'over', 'under', 'is', 'are', 'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had', 'do', 'does', 'did', 'of', 'that', 'this', 'it', 'as', 'which', 'than', 'whose'};
+stop_indeksi=find(ismember((sve_rijeci), (stop_rijeci))); %traži indekse stop rijeci
+G=G(~ismember(G(:, 1), stop_indeksi)& ~ismember(G(:, 2), stop_indeksi), :);%zadržava u G retke u kojima niti prva niti druga riječ nisu stop riječi
+\end{lstlisting}
+Riječi poput \emph{the}, \emph{of} ili \emph{is} pojavljuju se u gotovo svakoj definiciji. Da ih ne uklonimo, one bi bile povezane s velikim brojem riječi i dominirale bi podgrafom, a ne nose nikakvu informaciju o značenju. Zato definiramo popis od $53$ takvih riječi (članovi, veznici, prijedlozi i pomoćni glagoli), funkcija \texttt{ismember} traži njihove indekse u rječniku, a iz matrice \texttt{G} brišemo svaki brid kojem je barem jedan kraj stop riječ. Time se broj bridova smanjuje s $1\,398\,424$ na $967\,347$.
+
+Zatim se unosi riječ i izdvaja njezin podgraf okoline.
+
+\begin{lstlisting}[style=octave, caption={Podgraf okoline zadane riječi}, label={lst:rj_podgraf}]
+disp("----------------------------\n");
+rijec=input('Unesite zeljenu rijec: ', 's');
+[postoji, r]=ismember(rijec, sve_rijeci);
+if ~postoji
+  disp("Nema trazene rijeci u rjecniku.")
+  return
+endif
+
+I = G(G(:, 2)==r, 1); %vrhovi koji pokazuju na r
+J = G(G(:, 1)==r, 2); %vrhovi na koje r pokazuje
+
+K = unique([r; I(:); J(:)]); %svi vrhovi u podgrafu
+
+bridovi=ismember(G(:,1), K) & ismember(G(:,2), K); %vektor duljine kao G, 0 ako taj par nije u K, 1 ako je
+
+G_r=G(bridovi, :); %matrica kao G, ali samo s bridovima među vrhovima iz K
+\end{lstlisting}
+Korisnik upisuje riječ, a drugi izlaz funkcije \texttt{ismember} daje njezin indeks $r$ u rječniku. Ako riječ ne postoji, skripta se prekida. Vektor \texttt{I} sadrži riječi u čijoj se definiciji pojavljuje $r$, a vektor \texttt{J} riječi iz definicije od $r$. Skup \texttt{K} je njihova unija zajedno s $r$ i čini vrhove podgrafa $N_r$. Logički vektor \texttt{bridovi} označava retke matrice \texttt{G} kojima su oba kraja u \texttt{K}, pa \texttt{G\_r} sadrži točno bridove podgrafa $N_r$. Podgraf je malen, obično nekoliko desetaka do nekoliko stotina vrhova, pa se dalje može raditi s gustim matricama.
+
+Na kraju se gradi matrica susjedstava podgrafa, računa svojstveni vektor i ispisuju riječi.
+
+\begin{lstlisting}[style=octave, caption={Računanje sličnosti i ispis sinonima}, label={lst:rj_slicnost}]
+dim=size(K, 1); %broj vrhova u podmatrici susjedstva
+L=zeros(dim, dim);
+
+br_bridova=size(G_r, 1);
+
+for i=1:dim
+  for j=1:dim
+    par=find(G_r(:, 1)==K(i) & G_r(:, 2)==K(j));
+    %par je indeks retka u G_r u kojem se nalazi par (K(i), K(j))
+    if ~isempty(par) %ako taj redak u G_r postoji
+      L(i, j)=1;
+    end
+  end
+end
+
+[v, d] = eigs(L' * L + L * L', 1); % ima normu 1
+v = abs(v);
+[v, I] = sort(v, 'descend');
+
+ind = K(I);
+max = length(ind);
+
+% ispisuje sinonime po izracunatoj slicnosti
+for j = 1 : max
+  disp(sve_rijeci{ind(j)});
+endfor
+
+disp("----------------------------\n");
+\end{lstlisting}
+Dvostruka petlja gradi matricu susjedstava $L$ podgrafa: $L_{ij}=1$ ako u \texttt{G\_r} postoji brid od $K_i$ do $K_j$. Naredba \texttt{eigs(L' * L + L * L', 1)} računa svojstvenu vrijednost najveću po apsolutnoj vrijednosti i pripadni normirani svojstveni vektor \texttt{v}. Matrica $L^TL+LL^T$ je simetrična i nenegativna, pa prema Perron-Frobeniusovom teoremu taj vektor možemo odabrati nenegativan, a \texttt{abs} uklanja proizvoljni predznak koji vraća \texttt{eigs}. Komponenta $v_i$ je ocjena sličnosti riječi $K_i$ s vrhom $2$ strukturnog grafa. Komponente se sortiraju silazno, a \texttt{K(I)} pretvara poredak natrag u indekse riječi u rječniku. Ispisuju se sve riječi podgrafa od najsličnije do najmanje slične, pa je sama zadana riječ obično prva. Blok koji bi uklonio riječi ispred zadane riječi nije potreban pa ga nismo koristili.
+
+Za riječ \emph{disappear} podgraf okoline ima $41$ vrh i $88$ bridova, a prvih deset ispisanih riječi je u Tablici~\ref{tab:rj_disappear}.
+
+\begin{table}[H]
+    \centering
+    \caption{Najsličnije riječi riječi \emph{disappear}}
+    \label{tab:rj_disappear}
+    \begin{tabular}{rl}
+        \toprule
+        rang & riječ \\
+        \midrule
+        1  & disappear \\
+        2  & vanish \\
+        3  & pass \\
+        4  & die \\
+        5  & gradually \\
+        6  & wear \\
+        7  & faint \\
+        8  & fade \\
+        9  & sail \\
+        10 & light \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+Dobiveni popis nije čist popis sinonima, jer su u njemu i riječi koje su samo dio definicije, ali su pravi sinonimi među najbolje rangiranim riječima.
+
 \subsection{Gradovi Europe}
 
-Prvi primjer je mala mreža zračnih letova između $33$ europska grada (od Amsterdama do Zagreba). Vrhovi grafa su gradovi, a brid između dva grada postoji ako među njima postoji direktan let. Graf je neusmjeren pa je matrica susjedstava simetrična. Matrica je spremljena u datoteci \texttt{matrica\_Gradova.txt} i dimenzija joj  $33\times 33$ s elementima $0$ i $1$. Gradovi su poredani abecedno, tako da je Zagreb posljednji vrh (indeks $n=33$). Zanima nas kojem je gradu Zagreb najsličniji. Rezultat metode iz seminara usporedit ćemo s kosinusnom sličnosti, koja gleda samo koliko dva grada imaju zajedničkih direktnih odredišta.
+Drugi primjer je mala mreža zračnih letova između $33$ europska grada (od Amsterdama do Zagreba). Vrhovi grafa su gradovi, a brid između dva grada postoji ako među njima postoji direktan let. Graf je neusmjeren pa je matrica susjedstava simetrična. Matrica je spremljena u datoteci \texttt{matrica\_Gradova.txt} i dimenzija joj  $33\times 33$ s elementima $0$ i $1$. Gradovi su poredani abecedno, tako da je Zagreb posljednji vrh (indeks $n=33$). Zanima nas kojem je gradu Zagreb najsličniji. Rezultat metode iz seminara usporedit ćemo s kosinusnom sličnosti, koja gleda samo koliko dva grada imaju zajedničkih direktnih odredišta.
 
 Funkcija \texttt{blondel\_slicnost} iz Listinga~\ref{lst:blondel} spremljena je u zasebnu datoteku \texttt{blondel\_slicnost.m}. Za usporedbu pišemo i pomoćnu funkciju koja računa kosinusnu sličnost redaka binarne matrice $B$:
 \[
