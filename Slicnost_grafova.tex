@@ -392,7 +392,7 @@ endfor
 
 disp("----------------------------\n");
 \end{lstlisting}
-Dvostruka petlja gradi matricu susjedstava $L$ podgrafa: $L_{ij}=1$ ako u \texttt{G\_r} postoji brid od $K_i$ do $K_j$. Naredba \texttt{eigs(L' * L + L * L', 1)} računa svojstvenu vrijednost najveću po apsolutnoj vrijednosti i pripadni normirani svojstveni vektor \texttt{v}. Matrica $L^TL+LL^T$ je simetrična i nenegativna, pa prema Perron-Frobeniusovom teoremu taj vektor možemo odabrati nenegativan, a \texttt{abs} uklanja proizvoljni predznak koji vraća \texttt{eigs}. Komponenta $v_i$ je ocjena sličnosti riječi $K_i$ s vrhom $2$ strukturnog grafa. Komponente se sortiraju silazno, a \texttt{K(I)} pretvara poredak natrag u indekse riječi u rječniku. Ispisuju se sve riječi podgrafa od najsličnije do najmanje slične, pa je sama zadana riječ obično prva. Blok koji bi uklonio riječi ispred zadane riječi nije potreban pa ga nismo koristili.
+Dvostruka petlja gradi matricu susjedstava $L$ podgrafa: $L_{ij}=1$ ako u \texttt{G\_r} postoji brid od $K_i$ do $K_j$. Naredba \texttt{eigs(L' * L + L * L', 1)} računa svojstvenu vrijednost najveću po apsolutnoj vrijednosti i pripadni normirani svojstveni vektor \texttt{v}. Matrica $L^TL+LL^T$ je simetrična i nenegativna, pa prema Perron-Frobeniusovom teoremu taj vektor možemo odabrati nenegativan, a \texttt{abs} uklanja proizvoljni predznak koji vraća \texttt{eigs}. Komponenta $v_i$ je ocjena sličnosti riječi $K_i$ s vrhom $2$ strukturnog grafa. Komponente se sortiraju silazno, a \texttt{K(I)} pretvara poredak natrag u indekse riječi u rječniku. Ispisuju se sve riječi podgrafa od najsličnije do najmanje slične, pa je sama zadana riječ obično prva.
 
 Za riječ \emph{disappear} podgraf okoline ima $41$ vrh i $88$ bridova, a prvih deset ispisanih riječi je u Tablici~\ref{tab:rj_disappear}.
 
@@ -887,6 +887,11 @@ su jednaki. Štoviše, među svim matricama u ovom skupu postoji jedinstvena mat
 \]
 za $Z_0 = \mathbf{1}$.
 
+TEOREM 4. Neka je $B$ matrica susjedstva grafa $G_B$. Normirani centralni rezultati
+vrhova grafa $G_B$ dani su normiranim dominantnim svojstvenim vektorom
+matrice $B^TB+BB^T$, uz uvjet da je pripadni Perronov korijen višestrukosti
+$1$. Inače su dani normiranom projekcijom vektora $\mathbf{1}$ na dominantni
+invarijantni potprostor.
  \begin{thebibliography}{9}
 \bibitem{blondel2004similarity}
 Vincent D. Blondel, Anah{\'i} Gajardo, Maureen Heymans, Pierre Senellart, and Paul Van Dooren,
